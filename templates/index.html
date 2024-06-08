@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System</title>
+    <link rel="stylesheet" href="static/styles.css">
+    <script>
+        function addItem() {
+            const billOfLading = document.getElementById('billOfLading').value;
+            const itemName = document.getElementById('itemName').value;
+            const itemQuantity = parseInt(document.getElementById('itemQuantity').value);
+            const itemPrice = parseFloat(document.getElementById('itemPrice').value);
+
+            if (billOfLading && itemName && itemQuantity && itemPrice) {
+                fetch('/add_item', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        billOfLading,
+                        itemName,
+                        itemQuantity,
+                        itemPrice
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        displayInventory(data);
+                        document.getElementById('billOfLading').value = '';
+                        document.getElementById('itemName').value = '';
+                        document.getElementById('itemQuantity').value = '';
+                        document.getElementById('itemPrice').value = '';
+                    });
+            } else {
+                alert('Please fill out all fields');
+            }
+        }
+
+        function displayInventory(inventory) {
+            const inventoryTable = document.getElementById('inventoryTable');
+            inventoryTable.innerHTML = `
+        <tr>
+            <th>Bill of Lading</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+        </tr>
+    `;
+            for (const billOfLading in inventory) {
+                const item = inventory[billOfLading];
+                const row = inventoryTable.insertRow();
+                row.innerHTML = `
+            <td>${billOfLading}</td>
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>${item.price}</td>
+        `;
+            }
+        }
+
+        function getInventory() {
+            fetch('/get_inventory')
+                .then(response => response.json())
+                .then(data => displayInventory(data));
+        }
+
+        function uploadFile() {
+            const form = document.getElementById('uploadForm');
+            const formData = new FormData(form);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    displayInventory(data);
+                });
+        }
+
+        window.onload = function () {
+            getInventory(); // Load inventory on page load
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Inventory Management System</h1>
+        <div class="form-container">
+            <input type="text" id="billOfLading" placeholder="Bill of Lading">
+            <input type="text" id="itemName" placeholder="Item Name">
+            <input type="number" id="itemQuantity" placeholder="Quantity">
+            <input type="number" id="itemPrice" placeholder="Price">
+            <button onclick="addItem()">Add Item</button>
+            <button onclick="getInventory()">Get Inventory</button>
+        </div>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" id="file" name="file">
+            <button type="button" onclick="uploadFile()">Upload Bill of Lading</button>
+        </form>
+        <div class="inventory-list">
+            <h2>Inventory List</h2>
+            <table id="inventoryTable">
+                <tr>
+                    <th>Bill of Lading</th>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
