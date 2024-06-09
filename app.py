@@ -42,7 +42,7 @@ def upload_file():
         image = Image.open(file_path)
         left, top, right, bottom = 500, 60, 700, 120  # Adjust these coordinates as needed
         cropped_image = image.crop((left, top, right, bottom))
-        bl_inv_number = pytesseract.image_to_string(cropped_image, config='--psm 6').strip()
+        bill_of_lading = pytesseract.image_to_string(cropped_image, config='--psm 6').strip()
 
         # Here, add processing of the text file content if needed
         # This part of the code assumes you are uploading text files as well
@@ -57,7 +57,7 @@ def upload_file():
                         'price': float(item_price)
                     }
 
-        return jsonify({'bl_inv_number': bl_inv_number, 'inventory': inventory})
+        return jsonify({'bl_inv_number': bill_of_lading, 'inventory': item_quantity})
 
 @app.route('/')
 def serve_index():
